@@ -1,109 +1,72 @@
-import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
-//import icon from '../../assets/icon.svg';
-import './App.css';
-import { useState } from 'react';
+import {
+  MemoryRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+} from 'react-router-dom';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
+import Accueil from './Accueil';
+import Login from './Login';
+import Group from './Group';
+import Mail from './Mail';
+import DocInterne from './DocInterne';
+import DocExterne from './DocExterne';
+import CreateGroup from './CreateGroup';
+import DeleteGroup from './DeleteGroup';
+import CreateMail from './CreateMail';
+import DeleteMail from './DeleteMail';
+import SendMail from './SendMail';
+
+/*
 const Hello = () => {
+  const navigate = useNavigate();
+
   const [textArea, setTextArea] = useState('');
-  /*
-  //User Creation
-  window.electron.ipcRenderer.sendMessage('create-user', {
-    servername: 'smtp.gmail.com',
-    email: 'tsantaniainarakotonjanahary@gmail.com',
-    password: 'ETU001146',
-  });
-
-
-  window.electron.ipcRenderer.once('create-user', (arg) => {
-    console.log(arg);
-  });
-
-  window.electron.ipcRenderer.sendMessage('get-all-users', {
-    servername: 'smtp.gmail.com',
-    email: 'tsantaniainarakotonjanahary@gmail.com',
-    password: 'ETU001146',
-  });
-
-
-  window.electron.ipcRenderer.once('get-all-users', (arg) => {
-    console.log(arg);
-  });
-
-   */
-
-  //Create Group
-
-  /*
-  window.electron.ipcRenderer.sendMessage('create-group', {
-    nom: 'USAID',
-  });
-
-  window.electron.ipcRenderer.once('create-group', (arg) => {
-    console.log(arg);
-  });
-
-  //Create Mail By idGroup
-  window.electron.ipcRenderer.sendMessage('create-mail-by-idgroup', {
-    mail: 'tsantaniainarakotonjanahary@gmail.com',
-    idgroup: 8,
-  });
-
-  window.electron.ipcRenderer.once('create-mail-by-idgroup', (arg) => {
-    console.log(arg);
-  });
-
-  window.electron.ipcRenderer.sendMessage('get-mails-by-idgroup', {
-    idgroup: 1,
-  });
-
-  window.electron.ipcRenderer.once('get-mails-by-idgroup', (arg) => {
-    console.log(arg);
-  });
-
-  window.electron.ipcRenderer.sendMessage('delete-group', {
-    id: 2,
-  });
-
-  window.electron.ipcRenderer.once('delete-group', (arg) => {
-    console.log(arg);
-  });
-
-  window.electron.ipcRenderer.sendMessage('get-all-groups', {
-    servername: 'smtp.gmail.com',
-    email: 'tsantaniainarakotonjanahary@gmail.com',
-    password: 'ETU001146',
-  });
-
-  window.electron.ipcRenderer.once('get-all-groups', (arg) => {
-    console.log(arg);
-  });
-
-
-  */
-
-  window.electron.ipcRenderer.sendMessage('sendmail', {
-    mail: textArea,
-  });
 
   return (
     <div>
       <h1>Hello world</h1>
-      <textarea
-        value={textArea}
-        onChange={(event) => setTextArea(event.target.value)}
-      />
+      <label htmlFor="lab">
+        First name:
+        <textarea
+          value={textArea}
+          onChange={(event) => setTextArea(event.target.value)}
+        />
+      </label>
 
       <p>{textArea}</p>
+      <button
+        type="button"
+        onClick={() => {
+          navigate('/dashboard', { replace: true });
+        }}
+      >
+        click
+      </button>
     </div>
   );
 };
+*/
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Hello />} />
-      </Routes>
-    </Router>
+    <div>
+      <Container fluid="xxxl" className="bg-dark">
+        <Router>
+          <Routes>
+            <Route path="/" element={<Accueil />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/group" element={<Group />} />
+            <Route path="/mail" element={<Mail />} />
+            <Route path="/sendmail" element={<SendMail />} />
+            <Route path="/docinterne" element={<DocInterne />} />
+            <Route path="/docexterne" element={<DocExterne />} />
+          </Routes>
+        </Router>
+      </Container>
+    </div>
   );
 }

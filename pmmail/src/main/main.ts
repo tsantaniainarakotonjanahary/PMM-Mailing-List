@@ -1,20 +1,12 @@
-/* eslint global-require: off, no-console: off, promise/always-return: off */
-
-/**
- * This module executes inside of electron's main process. You can start
- * electron renderer process from here and communicate with the other processes
- * through IPC.
- *
- * When running `npm run build` or `npm run build:main`, this file is compiled to
- * `./src/main.js` using webpack. This gives us some performance wins.
- */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, Notification } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import sqlite = require('sqlite3');
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+
+const nodemailer = require('nodemailer');
 
 class AppUpdater {
   constructor() {
@@ -43,10 +35,53 @@ db.serialize(() => {
 
 let mainWindow: BrowserWindow | null = null;
 
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
+ipcMain.on('send-mail', async (event, arg) => {
+  db.all(
+    `SELECT  groups.nom as groupname, mails.nom as mailname, mails.id as idmail  , groups.id as idgroup FROM mails join groups on groups.id = mails.idgroup where groups.id = '${arg.groupId}'`,
+    (err, rows) => {
+      if (err) {
+        event.reply('send-mail', err.message);
+      } else {
+        let str = '';
+        for (var i = 0; i < rows.length; i++) {
+          str += `${rows[i].mailname},`;
+        }
+        const host = 'smtp.gmail.com';
+        const from = 'tsantaniainarakotonjanahary@gmail.com';
+        const password = 'snwcidailduftksy';
+        const to = str;
+        const html = arg.message
+          .replace(/(\r\n|\r|\n)/g, '<br/>')
+          .replace(/ /g, '\u00a0');
+        const subject = arg.sujet;
+        const attachments = arg.arr;
+
+        nodemailer
+          .createTransport({
+            host,
+            port: 587,
+            secure: false,
+            auth: {
+              user: from,
+              pass: password,
+            },
+          })
+          .sendMail(
+            {
+              from,
+              to,
+              subject,
+              html,
+              attachments,
+            },
+            (error: { message: any }) => {
+              if (error) event.reply('send-mail', error.message);
+              else event.reply('send-mail', 'Email Envoyé');
+            }
+          );
+      }
+    }
+  );
 });
 
 ipcMain.on('create-user', async (event, arg) => {
@@ -77,16 +112,26 @@ ipcMain.on('delete-group', async (event, arg) => {
   const stmt = db.prepare('DELETE FROM  groups WHERE id = ? ');
   stmt.run(arg.id);
   stmt.finalize();
-  event.reply('create-group', 'group-deleted');
+  event.reply('delete-group', 'group-deleted');
 });
 
-ipcMain.on('get-all-users', async (event, arg) => {
-  db.get('SELECT * FROM users', (err, row) => {
-    if (err) {
-      return console.error(err.message);
+ipcMain.on('delete-mail', async (event, arg) => {
+  const stmt = db.prepare('DELETE FROM  mails WHERE id = ? ');
+  stmt.run(arg.id);
+  stmt.finalize();
+  event.reply('delete-mail', 'mail-deleted');
+});
+
+ipcMain.on('get-user', async (event, arg) => {
+  db.all(
+    `SELECT * FROM users where email='${arg.email}' and password = '${arg.password}' `,
+    (err, row) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      event.reply('get-user', row || 'null');
     }
-    event.reply('get-all-users', row || 'null');
-  });
+  );
 });
 
 ipcMain.on('get-all-groups', async (event, arg) => {
@@ -95,18 +140,13 @@ ipcMain.on('get-all-groups', async (event, arg) => {
   });
 });
 
-ipcMain.on('sendmail', async (event, arg) => {
-  console.log(arg.mail);
-});
-
 ipcMain.on('get-mails-by-idgroup', async (event, arg) => {
   db.all(
-    `SELECT  groups.nom as groupname, mails.nom as mailname, mails.id as idmail  , groups.id as idgroups FROM mails join groups on groups.id = mails.idgroup where groups.id = '${arg.idgroup}'`,
+    `SELECT  groups.nom as groupname, mails.nom as mailname, mails.id as idmail  , groups.id as idgroup FROM mails join groups on groups.id = mails.idgroup where groups.id = '${arg.idgroup}'`,
     (err, row) => {
       if (err) {
         console.log(err.message);
       }
-      console.log(row);
       event.reply('get-mails-by-idgroup', row);
     }
   );
