@@ -61,6 +61,14 @@ function Accueil() {
               Clic le bouton ci-dessous pour Commencer!
             </div>
             <Button variant="outline-warning">Commencer</Button>
+            <Button
+              variant="outline-warning"
+              onClick={() => {
+                electron.ipcRenderer.sendMessage('auth');
+              }}
+            >
+              Go
+            </Button>
           </Stack>
         </Col>
         <Col md={3}></Col>

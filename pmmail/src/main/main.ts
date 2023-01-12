@@ -257,3 +257,20 @@ app
     });
   })
   .catch(console.log);
+
+
+ipcMain.on('auth', async (event,arg) =>
+{
+  const fs = require('fs').promises;
+  const path = require('path');
+  const process = require('process');
+  const {authenticate} = require('@google-cloud/local-auth');
+  const open = require('open');
+
+  async function authorize() {
+    let client = await authenticate({ scopes: ['https://mail.google.com/'], keyfilePath: path.join(process.cwd(), 'credentials.json'), });
+    if (client.credentials) { console.log(client);   }
+    return client;
+  }
+  authorize().then(()=>{ console.log("success"); }).catch(console.error);
+})
